@@ -115,6 +115,16 @@ public class MirrorController {
 
         Runnable tick = () -> {
             try {
+                var linkOpt = mirrorService.resolveActive(token);
+                if (linkOpt.isEmpty()) {
+                    emitter.send(SseEmitter.event()
+                            .name("expired")
+                            .data("{\"error\":\"TOKEN_EXPIRED\"}"));
+                    emitter.complete();
+                    scheduler.shutdownNow();
+                    return;
+                }
+
                 if (cache.getState() != PositionCache.State.OK) {
                     emitter.send(SseEmitter.event().name("status").data("{\"state\":\"reconnecting\"}"));
                     return;

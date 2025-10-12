@@ -21,4 +21,7 @@ public class Device {
 
     @Column(name = "created_at", nullable = false, columnDefinition = "timestamptz")
     private OffsetDateTime createdAt = OffsetDateTime.now();
+
+    @Column(name = "user_id")
+    private Long userId;
 }

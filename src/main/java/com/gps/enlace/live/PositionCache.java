@@ -19,6 +19,17 @@ public class PositionCache {
     public State getState() { return state; }
 
     public static boolean isStale(Instant fix, int staleMinutes) {
-        return fix == null || Instant.now().minusSeconds((long) staleMinutes * 60).isAfter(fix);
+        if (fix == null) return true;
+
+        // adjust Traccar's local time (8h behind UTC) to server time
+        Instant adjustedFix = fix.plusSeconds(8 * 3600);
+
+        Instant now = Instant.now();
+        long diffSec = java.time.Duration.between(adjustedFix, now).getSeconds();
+        boolean stale = now.minusSeconds((long) staleMinutes * 60).isAfter(adjustedFix);
+
+        return stale;
     }
+
+
 }
