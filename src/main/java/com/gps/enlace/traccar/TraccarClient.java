@@ -117,6 +117,7 @@ public class TraccarClient {
 
     private void handleMessage(String json) {
         try {
+            System.err.println("[RAW TRACCAR MESSAGE] " + json);
             JsonNode root = mapper.readTree(json);
             // Traccar envía objetos como {"positions":[{...}], "events":[...]} etc.
             Optional.ofNullable(root.get("positions")).ifPresent(arr -> {

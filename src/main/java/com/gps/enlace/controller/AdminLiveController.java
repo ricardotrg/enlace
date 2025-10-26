@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -22,9 +23,8 @@ public class AdminLiveController {
 
     private final PositionCache cache;
     private final TraccarProps props;
-
-
     private final com.gps.enlace.traccar.TraccarClient traccar;
+
     public AdminLiveController(PositionCache cache, TraccarProps props, com.gps.enlace.traccar.TraccarClient traccar) {
         this.cache = cache; this.props = props; this.traccar = traccar;
     }
@@ -75,20 +75,32 @@ public class AdminLiveController {
     @ResponseBody
     public ResponseEntity<?> trail(@RequestParam("deviceId") long deviceId,
                                    @RequestParam(name = "hours", defaultValue = "24") int hours) {
-        java.time.Instant to = java.time.Instant.now();
-        java.time.Instant from = to.minusSeconds((long) hours * 3600);
 
-        System.out.println("[TRAIL] req deviceId=" + deviceId + " hours=" + hours);
+        // Traccar server local time (example: UTC-08:00). Move to config if needed.
+        var TRACCAR_ZONE = java.time.ZoneId.of("UTC-08:00");
 
-        // Usa el cliente de Traccar
+        var toZ   = java.time.ZonedDateTime.now(TRACCAR_ZONE);
+        var fromZ = toZ.minusHours(hours);
+
+        java.time.Instant to   = toZ.toInstant();   // send UTC instants
+        java.time.Instant from = fromZ.toInstant();
+
+        System.out.println("[TRAIL] deviceId=" + deviceId
+                + " hours=" + hours
+                + " from(UTC)=" + from
+                + " to(UTC)=" + to
+                + " from(local)=" + fromZ
+                + " to(local)=" + toZ);
+
         try {
-            var list = traccar.fetchRoute(deviceId, from, to).block(); // simple para MVP
+            var list = traccar.fetchRoute(deviceId, from, to).block();
+            if (list != null) list.forEach(p -> System.out.println(p.fixTime));
 
-            java.util.List<java.util.Map<String, Object>> dto = list.stream()
-                    .map(p -> (java.util.Map<String, Object>) java.util.Map.of(
-                            "lat", (Object) p.lat,
-                            "lon", (Object) p.lon,
-                            "fixTime", (Object) p.fixTime.toString()
+            var dto = list.stream()
+                    .map(p -> java.util.Map.<String,Object>of(
+                            "lat", p.lat,
+                            "lon", p.lon,
+                            "fixTime", p.fixTime.toString()
                     ))
                     .collect(java.util.stream.Collectors.toList());
 
