@@ -20,8 +20,8 @@ public class MirrorService {
     private final TokenGenerator tokenGen;
     private final PositionCache cache;
 
-    @Value("${mirror.token.ttl-hours:24}")
-    private int ttlHours;
+    @Value("${mirror.token.ttl-hours:12}")
+    private int defaultTtlHours;
 
     public MirrorService(MirrorLinkRepo mirrorRepo, DeviceRepo deviceRepo, TokenGenerator tokenGen, PositionCache cache) {
         this.mirrorRepo = mirrorRepo;
@@ -30,7 +30,9 @@ public class MirrorService {
         this.cache = cache;
     }
 
-    public MirrorLink createForTraccarDevice(long traccarDeviceId) {
+    public MirrorLink createForTraccarDevice(long traccarDeviceId, Integer customExpirationHours) {
+        int ttlHours = customExpirationHours != null ? customExpirationHours : defaultTtlHours;
+        
         Device d = deviceRepo.findByTraccarDeviceId(traccarDeviceId)
                 .orElseGet(() -> {
                     Device nd = new Device();

@@ -25,9 +25,10 @@ public class SecurityConfig {
       .csrf(csrf -> csrf.disable())
       .cors(Customizer.withDefaults())
       .authorizeHttpRequests(auth -> auth
-              .requestMatchers("/controller/admin/**").permitAll()
+              .requestMatchers("/api/admin/**").permitAll()
+              .requestMatchers("/api/mirror/**").permitAll()
+              .requestMatchers("/api/client/**").permitAll()
               .requestMatchers("/actuator/health").permitAll()
-              .requestMatchers("/controller/mirror/**").permitAll()
               .requestMatchers("/ver/**").permitAll()
               .anyRequest().permitAll()
       )

@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://127.0.0.1:5175","http://localhost:5175"})
+//@CrossOrigin(origins = {"http://127.0.0.1:5175","http://localhost:5175"})
 public class MirrorController {
 
     private final MirrorService mirrorService;
@@ -39,14 +39,22 @@ public class MirrorController {
 
     /* ---- ADMIN: crear enlace espejo ---- */
     @PostMapping("/mirror")
-    public ResponseEntity<?> create(@RequestBody Map<String, Long> body,
+    public ResponseEntity<?> create(@RequestBody Map<String, Object> body,
                                     @RequestHeader(value = "X-Forwarded-Proto", required = false) String proto,
                                     @RequestHeader(value = "Host", required = false) String host) {
-        Long traccarDeviceId = body.get("traccarDeviceId");
+        Long traccarDeviceId = body.get("traccarDeviceId") instanceof Number 
+            ? ((Number) body.get("traccarDeviceId")).longValue() 
+            : null;
+        
         if (traccarDeviceId == null) {
             return ResponseEntity.badRequest().body(Map.of("error","MISSING_DEVICE_ID"));
         }
-        var ml = mirrorService.createForTraccarDevice(traccarDeviceId);
+        
+        Integer expirationHours = body.get("expirationHours") instanceof Number
+            ? ((Number) body.get("expirationHours")).intValue()
+            : null;
+        
+        var ml = mirrorService.createForTraccarDevice(traccarDeviceId, expirationHours);
         String scheme = (proto != null ? proto : "http");
         String base = (host != null ? scheme + "://" + host : "");
         String url = base + "/ver/" + ml.getToken();

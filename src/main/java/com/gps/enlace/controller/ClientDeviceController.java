@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/client")
-@CrossOrigin(origins = {"http://127.0.0.1:5175","http://localhost:5175"})
 public class ClientDeviceController {
 
     private final DeviceRepo devices;

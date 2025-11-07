@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 @Controller
 @RequestMapping("/api/admin")
+//@CrossOrigin(origins = {"http://127.0.0.1:5175","http://localhost:5175"})
 public class AdminLiveController {
 
     private final PositionCache cache;
