@@ -30,6 +30,7 @@ public class AdminLiveController {
         this.cache = cache; this.props = props; this.traccar = traccar;
     }
 
+    // Devuelve la última posición conocida (JSON) para el dispositivo indicado (o el default configurado).
     @GetMapping(value = "/live", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> latest(@RequestParam(name="traccarDeviceId", required = false) Long deviceId) {
@@ -41,6 +42,7 @@ public class AdminLiveController {
         return ResponseEntity.ok(dto(fix.get(), stale));
     }
 
+    // Abre un stream SSE que envía eventos "position" con la ubicación actual cada vez que cambia.
     @GetMapping(value = "/live/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@RequestParam(name="traccarDeviceId", required = false) Long deviceId) {
         long id = deviceId != null ? deviceId : props.getDeviceId();
@@ -72,6 +74,7 @@ public class AdminLiveController {
     }
 
     // === HISTORIAL ADMIN: ?deviceId=4&hours=24 ===
+    // Devuelve el historial (ruta) del dispositivo para las últimas N horas consultando Traccar.
     @GetMapping(value = "/trail", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<?> trail(@RequestParam("deviceId") long deviceId,

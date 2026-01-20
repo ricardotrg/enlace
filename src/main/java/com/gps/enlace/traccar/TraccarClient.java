@@ -197,6 +197,62 @@ public class TraccarClient {
     }
 
 
+    // === CREATE DEVICE IN TRACCAR ===
+    public Mono<JsonNode> createDevice(String uniqueId, String name) {
+        System.out.println("[CREATE_DEVICE] Creating device in Traccar: uniqueId=" + uniqueId + ", name=" + name);
+        
+        var deviceBody = new java.util.HashMap<String, Object>();
+        deviceBody.put("uniqueId", uniqueId);
+        deviceBody.put("name", name);
+        
+        return http.post()
+                .uri("/api/devices")
+                .header("Cookie", sessionCookie != null ? sessionCookie : "")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(deviceBody)
+                .retrieve()
+                .onStatus(
+                    status -> status.value() >= 400,
+                    resp -> resp.bodyToMono(String.class)
+                            .map(body -> new RuntimeException("[CREATE_DEVICE] Traccar error: " + body))
+                )
+                .bodyToMono(JsonNode.class)
+                .doOnSuccess(response -> System.out.println("[CREATE_DEVICE] Device created in Traccar: " + response))
+                .doOnError(err -> System.out.println("[CREATE_DEVICE] Error: " + err.getMessage()));
+    }
+
+    // === FETCH ALL DEVICES FROM TRACCAR ===
+    public Mono<List<JsonNode>> fetchDevices() {
+        System.out.println("[FETCH_DEVICES] Fetching all devices from Traccar");
+        
+        return http.get()
+                .uri("/api/devices")
+                .header("Cookie", sessionCookie != null ? sessionCookie : "")
+                .retrieve()
+                .bodyToFlux(JsonNode.class)
+                .collectList()
+                .doOnSuccess(devices -> System.out.println("[FETCH_DEVICES] Retrieved " + devices.size() + " devices"))
+                .doOnError(err -> System.out.println("[FETCH_DEVICES] Error: " + err.getMessage()));
+    }
+
+    // === DELETE DEVICE FROM TRACCAR ===
+    public Mono<Void> deleteDevice(Long traccarDeviceId) {
+        System.out.println("[DELETE_DEVICE] Deleting device from Traccar: deviceId=" + traccarDeviceId);
+        
+        return http.delete()
+                .uri("/api/devices/" + traccarDeviceId)
+                .header("Cookie", sessionCookie != null ? sessionCookie : "")
+                .retrieve()
+                .onStatus(
+                    status -> status.value() >= 400,
+                    resp -> resp.bodyToMono(String.class)
+                            .map(body -> new RuntimeException("[DELETE_DEVICE] Traccar error: " + body))
+                )
+                .bodyToMono(Void.class)
+                .doOnSuccess(response -> System.out.println("[DELETE_DEVICE] Device deleted from Traccar"))
+                .doOnError(err -> System.out.println("[DELETE_DEVICE] Error: " + err.getMessage()));
+    }
+
     private Instant parseTime(String iso) {
         try { return iso == null ? null : Instant.parse(iso); }
         catch (Exception e) { return null; }

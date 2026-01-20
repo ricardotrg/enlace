@@ -10,6 +10,8 @@ import java.util.Optional;
 
 public interface DeviceRepo extends JpaRepository<Device, Long> {
     Optional<Device> findByTraccarDeviceId(Long traccarDeviceId);
+    
+    Optional<Device> findByUniqueId(String uniqueId);
 
     @Query(value = "SELECT * FROM device WHERE user_id = :userId", nativeQuery = true)
     List<Device> findAllByUserId(@Param("userId") Long userId);

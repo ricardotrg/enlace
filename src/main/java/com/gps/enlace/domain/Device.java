@@ -16,6 +16,9 @@ public class Device {
     @Column(name = "traccar_device_id", nullable = false, unique = true)
     private Long traccarDeviceId;
 
+    @Column(name = "unique_id", unique = true, length = 100)
+    private String uniqueId;
+
     @Column(name = "name")
     private String name;
 
