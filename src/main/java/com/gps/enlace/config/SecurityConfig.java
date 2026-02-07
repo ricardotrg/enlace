@@ -28,6 +28,8 @@ public class SecurityConfig {
               .requestMatchers("/api/admin/**").permitAll()
               .requestMatchers("/api/mirror/**").permitAll()
               .requestMatchers("/api/client/**").permitAll()
+              .requestMatchers("/ping").permitAll()
+              .requestMatchers("/ver/ping").permitAll()
               .requestMatchers("/actuator/health").permitAll()
               .requestMatchers("/ver/**").permitAll()
               .anyRequest().permitAll()

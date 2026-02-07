@@ -1,0 +1,15 @@
+# Maven / build output
+target/
+
+# IDE / VCS
+.git/
+.github/
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Maven wrapper cache not needed in image build context
+.mvn/wrapper/maven-wrapper.jar
